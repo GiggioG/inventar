@@ -7,10 +7,11 @@ let ItemProto = {
         return (this.parent ? (this.parent.sayLocation() + " > ") : "") + this.name;
     },
     search: function(type, search) {
+        search = search.toLowerCase();
         if (type == "id" && this.id == search) { return [this]; }
         let ret = [];
-        if (type == "name" && this.name.includes(search)) { ret = [this]; }
-        if (type == "description" && this.description.includes(search)) { ret = [this]; }
+        if (type == "name" && this.name.toLowerCase().includes(search)) { ret = [this]; }
+        if (type == "description" && this.description.toLowerCase().includes(search)) { ret = [this]; }
         return ret.concat(this.children.reduce((p, c) => { return p.concat(c.search(type, search)) }, []));
     }
 }
@@ -55,7 +56,6 @@ function saveDB() {
 }
 
 function api_search(type, search, res) {
-    search = search.toLowerCase();
     let results = db.root.search(type, search);
     if (results.length == 0) {
         res.end("null");
@@ -131,8 +131,10 @@ http.createServer((req, res) => {
         return;
     } else if (req.url == "/search") {
         fs.createReadStream("search.html").pipe(res);
-    } else if (req.url == "/search.png") {
+    } else if (req.url == "/res/search.png") {
         fs.createReadStream("search.png").pipe(res);
+    } else if (req.url == "/res/homepage.png") {
+        fs.createReadStream("homepage.png").pipe(res);
     } else {
         fs.createReadStream("item.html").pipe(res);
     }

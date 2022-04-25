@@ -15,6 +15,20 @@
             margin-bottom: 0px;
         }
     </style>
+    <style>
+        img#homepage_icon {
+            width: 50px;
+            height: 50px;
+        }
+        
+        a#homepage {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: min-content;
+            height: min-content;
+        }
+    </style>
 </head>
 
 <body>
@@ -30,6 +44,7 @@
     <hr>
     <div id="results">
     </div>
+    <a href="/1" id="homepage"><img src="/res/homepage.png" id="homepage_icon"></a>
     <script>
         const qs = s => document.querySelector(s);
 
