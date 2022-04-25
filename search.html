@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Търсене</title>
+    <style>
+        p {
+            margin-top: 0px;
+        }
+        
+        h2 {
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <label>Търсене по:</label>
+    <select id="type">
+        <option value="id">Номер</option>
+        <option selected value="name">Име</option>
+        <option value="description">Описание</option>
+    </select>
+    <br>
+    <input type="text" id="search" placeholder="Търсене..." style="width:95%"><br>
+    <input type="button" id="submit" value="Търси">
+    <hr>
+    <div id="results">
+    </div>
+    <script>
+        const qs = s => document.querySelector(s);
+
+        function el(e, content = null) {
+            let element = document.createElement(e);
+            if (content != null) {
+                element.innerText = content;
+            }
+            return element;
+        };
+
+        function resultLi(result) {
+            let li = el("li");
+
+            let a = el("a");
+            a.href = `/${result.id}`;
+            a.appendChild(el("h2", result.name));
+            li.appendChild(a);
+
+            let description = el("p", result.description);
+            description.style.fontStyle = "italic"
+            li.appendChild(description);
+
+            return li;
+        }
+        qs("input#submit").addEventListener("click", () => {
+            let paramObj = {};
+            paramObj[qs("select#type").value] = qs("input#search").value;
+            let params = new URLSearchParams(paramObj).toString();
+
+            let results_div = qs("div#results");
+            fetch(`${location.origin}/api/search?${params}`).then(rsp => rsp.json()).then(res => {
+                results.innerHTML = "";
+                if (res == null) {
+                    results_div.innerHTML = `<b style=\"color:red\">Няма резултати от вашето търсене.</b>`;
+                } else {
+                    if (qs("select#type").value == "id") {
+                        location.pathname = `/${res[0].id}`;
+                        return;
+                    }
+                    let ul = el("ul");
+                    results_div.appendChild(ul);
+                    res.forEach(r => {
+                        console.log(r);
+                        ul.appendChild(resultLi(r));
+                    })
+                }
+            })
+        });
+    </script>
+</body>
+
+</html>
