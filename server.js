@@ -13,6 +13,20 @@ let ItemProto = {
         if (type == "name" && this.name.toLowerCase().includes(search)) { ret = [this]; }
         if (type == "description" && this.description.toLowerCase().includes(search)) { ret = [this]; }
         return ret.concat(this.children.reduce((p, c) => { return p.concat(c.search(type, search)) }, []));
+    },
+    delete: function(id) {
+        for (c in this.children) {
+            if (this.children[c].id == id) {
+                this.children.splice(c, 1);
+                return true;
+            }
+        }
+        for (c in this.children) {
+            if (this.children[c].delete(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -94,7 +108,7 @@ function api_add(name, description, parentId, currentLocation, res) {
     let parent = db.root.search("id", parentId)[0];
     if (!parent) {
         res.writeHead(404);
-        res.end(`Няма елемент с №${parentId}`);
+        res.end(`Няма елемент #${parentId}`);
         return;
     }
     let item = {
@@ -112,6 +126,50 @@ function api_add(name, description, parentId, currentLocation, res) {
     res.end(`${item.id}`);
 }
 
+function api_edit(name, description, id, currentLocation, res) {
+    if (id == 1) {
+        res.writeHead(405);
+        res.end("Не може да се редактира началната страница");
+        return;
+    }
+    let item = db.root.search("id", id)[0];
+    if (!item) {
+        res.writeHead(404);
+        res.end(`Няма елемент #${id}`);
+        return;
+    }
+    item.name = name;
+    item.description = description
+    item.currentLocation = (currentLocation == "" ? null : currentLocation);
+    saveDB();
+    res.writeHead(200);
+    res.end(`${item.id}`);
+}
+
+function api_del(id, res) {
+    if (id == 1) {
+        res.writeHead(405);
+        res.end("Не може да се трие началната страница");
+        return;
+    }
+    let item = db.root.search("id", id)[0];
+    if (!item) {
+        res.writeHead(404);
+        res.end(`Няма елемент #${id}`);
+        return;
+    }
+    if (item.children.length > 0) {
+        res.writeHead(405);
+        res.end(`Не може да се трие елемент, който съдържа нещо`);
+        return;
+    }
+    let parentId = item.parent.id;
+    db.root.delete(id);
+    saveDB();
+    res.writeHead(200);
+    res.end(`${parentId}`);
+}
+
 function api(req, res) {
     let parsed = url.parse(req.url);
     let endpoint = parsed.pathname.slice(5);
@@ -122,6 +180,14 @@ function api(req, res) {
     }
     if (req.method == "POST" && endpoint == "add") {
         api_add(query.name, query.description, query.parentId, query.currentLocation, res);
+        return;
+    }
+    if (req.method == "PUT" && endpoint == "edit") {
+        api_edit(query.name, query.description, query.id, query.currentLocation, res);
+        return;
+    }
+    if (req.method == "DELETE" && endpoint == "del") {
+        api_del(query.id, res);
         return;
     }
 }
