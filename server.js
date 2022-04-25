@@ -121,11 +121,6 @@ function api(req, res) {
         return;
     }
     if (req.method == "POST" && endpoint == "add") {
-        if (req.socket.remoteAddress != "::ffff:192.168.0.105") {
-            res.writeHead(400);
-            res.end("nedej ma");
-            return;
-        }
         api_add(query.name, query.description, query.parentId, query.currentLocation, res);
         return;
     }
