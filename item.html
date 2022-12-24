@@ -60,8 +60,13 @@
         <input type="text" id="edit_curLoc" placeholder="Настоящо място"><br>
         <input type="button" value="Промени" id="edit_submit">
     </div>
+    <div id="move" class="form">
+        <h3 id="move_title">Премести елемент</h3>
+        <input type="number" required id="move_moveTo" placeholder="Премести във"><br>
+        <input type="button" value="Премести" id="move_submit">
+    </div>
     <div id="del" class="form">
-        <h3 id="del_title">Изтриване на елемент</h3>
+        <h3 id="del_title">Изтрий елемент</h3>
         <input type="button" value="Изтрий" id="del_submit">
     </div>
     <a href="/search" id="search"><img src="/res/search.png" id="search_icon"></a>
@@ -96,6 +101,16 @@
                 id
             })).toString();
             fetch(`${location.origin}/api/edit?${params}`, {
+                method: "PUT"
+            }).then(res => location.reload());
+        });
+        qs("input#move_submit").addEventListener("click", async ()=>{
+            let moveTo = qs("input#move_moveTo").value;
+            let params = (new URLSearchParams({
+                id,
+                to: moveTo,
+            })).toString();
+            fetch(`${location.origin}/api/move?${params}`, {
                 method: "PUT"
             }).then(res => location.reload());
         });
@@ -173,7 +188,10 @@
             if (result.id == 1) {
                 qs("div#edit").remove();
             }
-            if (result.id == 1 || result.children.length > 0) {
+            // if (result.id == 1 || result.children.length > 0) {
+            //     qs("div#del").remove();
+            // }
+            if (result.id == 1) {
                 qs("div#del").remove();
             }
         })();

@@ -146,6 +146,34 @@ function api_edit(name, description, id, currentLocation, res) {
     res.end(`${item.id}`);
 }
 
+function api_move(id, to, res) {
+    if (id == 1) {
+        res.writeHead(405);
+        res.end("Не може да се мести началната страница");
+        return;
+    }
+    let item = db.root.search("id", id)[0];
+    if (!item) {
+        res.writeHead(404);
+        res.end(`Няма елемент #${id}`);
+        return;
+    }
+    let parent = db.root.search("id", to)[0];
+    if (!item) {
+        res.writeHead(404);
+        res.end(`Няма елемент #${to}`);
+        return;
+    }
+    
+    db.root.delete(id);
+    setupOneItem(item, parent);
+    parent.children.push(item);
+    
+    saveDB();
+    res.writeHead(200);
+    res.end(`${to}`);
+}
+
 function api_del(id, res) {
     if (id == 1) {
         res.writeHead(405);
@@ -158,11 +186,11 @@ function api_del(id, res) {
         res.end(`Няма елемент #${id}`);
         return;
     }
-    if (item.children.length > 0) {
-        res.writeHead(405);
-        res.end(`Не може да се трие елемент, който съдържа нещо`);
-        return;
-    }
+    // if (item.children.length > 0) {
+    //     res.writeHead(405);
+    //     res.end(`Не може да се трие елемент, който съдържа нещо`);
+    //     return;
+    // }
     let parentId = item.parent.id;
     db.root.delete(id);
     saveDB();
@@ -185,6 +213,9 @@ function api(req, res) {
     if (req.method == "PUT" && endpoint == "edit") {
         api_edit(query.name, query.description, query.id, query.currentLocation, res);
         return;
+    }
+    if(req.method == "PUT" && endpoint == "move"){
+        api_move(query.id, query.to, res);
     }
     if (req.method == "DELETE" && endpoint == "del") {
         api_del(query.id, res);
