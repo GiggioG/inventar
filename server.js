@@ -72,6 +72,7 @@ function saveDB() {
 function api_search(type, search, res) {
     let results = db.root.search(type, search);
     if (results.length == 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
         res.end("null");
         return;
     }
@@ -159,7 +160,7 @@ function api_move(id, to, res) {
         return;
     }
     let parent = db.root.search("id", to)[0];
-    if (!item) {
+    if (!parent) {
         res.writeHead(404);
         res.end(`Няма елемент #${to}`);
         return;
