@@ -87,6 +87,7 @@
                     }
                     let ul = el("ul");
                     results_div.appendChild(ul);
+                    res.sort((a, b)=>(a.name < b.name?-1:1));
                     res.forEach(r => {
                         console.log(r);
                         ul.appendChild(resultLi(r));

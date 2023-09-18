@@ -7,29 +7,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
     <style>
-        img#search_icon {
+        img#homepage_icon {
             width: 50px;
             height: 50px;
         }
-        
-        a#search {
+
+        a#homepage {
             position: absolute;
             top: 0px;
             right: 0px;
             width: min-content;
             height: min-content;
         }
-        
+
+        img#search_icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        a#search {
+            position: absolute;
+            top: 0px;
+            right: 50px;
+            width: min-content;
+            height: min-content;
+        }
+
         input[type="text"] {
             width: -webkit-fill-available;
         }
-        
+
         div.form {
             background-color: rgb(217, 217, 217);
             padding: 10px;
             margin: 5px 0px 5px 0px;
         }
-        
+
         h3 {
             margin-top: 0px;
             padding-top: 0px;
@@ -69,6 +82,7 @@
         <h3 id="del_title">Изтрий елемент</h3>
         <input type="button" value="Изтрий" id="del_submit">
     </div>
+    <a href="/1" id="homepage"><img src="/res/homepage.png" id="homepage_icon"></a>
     <a href="/search" id="search"><img src="/res/search.png" id="search_icon"></a>
 
     <script>
@@ -104,7 +118,7 @@
                 method: "PUT"
             }).then(res => location.reload());
         });
-        qs("input#move_submit").addEventListener("click", async ()=>{
+        qs("input#move_submit").addEventListener("click", async () => {
             let moveTo = qs("input#move_moveTo").value;
             let params = (new URLSearchParams({
                 id,
@@ -136,7 +150,7 @@
             return element;
         };
 
-        (async() => {
+        (async () => {
             id = (location.pathname.slice(1).length > 0 ? location.pathname.slice(1) : 1);
             let raw_results = await fetch(`${location.origin}/api/search?id=${id}`);
             let result = (await raw_results.json())[0];
@@ -147,6 +161,10 @@
             qs("input#edit_desc").value = result.description
             if (result.id != 1 && result.currentLocation != null) {
                 qs("input#edit_curLoc").value = result.currentLocation
+            }
+            if(result.id == 1){
+                document.querySelector("a#homepage").remove();
+                document.querySelector("a#search").style.right = "0px";
             }
             if (result.parent == null) {
                 qs("p#parent").remove();
@@ -177,6 +195,7 @@
                 qs("ul#children").remove();
             } else {
                 let children = qs("ul#children");
+                result.children.sort((a, b) => (a.name < b.name ? -1 : 1));
                 result.children.forEach(c => {
                     let li = el("li");
                     let a = el("a", c.name);
